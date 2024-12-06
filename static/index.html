@@ -11,7 +11,6 @@
 <div class="container mt-5">
     <h1 class="text-center">Обработка изображений</h1>
 
-    <!-- Секция для эндпоинта create_mask -->
     <div class="card mb-5">
         <div class="card-header bg-primary text-white">
             <h3>Создание маски и полигона</h3>
@@ -28,7 +27,6 @@
         </div>
     </div>
 
-    <!-- Секция для эндпоинта fragment_image -->
     <div class="card">
         <div class="card-header bg-success text-white">
             <h3>Фрагментация изображения</h3>
@@ -48,7 +46,7 @@
                     <input type="number" class="form-control" id="maxFragmentSize" value="5000" required>
                 </div>
                 <div class="form-group">
-                    <label for="minCoverage">Минимальное покрытие:</label>
+                    <label for="minCoverage">Минимальное покрытие(%/100):</label>
                     <input type="number" step="0.01" class="form-control" id="minCoverage" value="0.05" required>
                 </div>
                 <button type="submit" class="btn btn-success">Выполнить фрагментацию</button>
@@ -60,7 +58,6 @@
 
 <script>
     $(document).ready(function () {
-        // Обработка create_mask
         $('#createMaskForm').on('submit', function (e) {
             e.preventDefault();
 
@@ -80,7 +77,7 @@
                     const archiveName = response.archive_name;
                     $('#maskResult').html(`
                         <p class="text-success">Маска и полигон успешно созданы! Файл: <strong>${archiveName}</strong></p>
-                        <a href="/download_archive?archive_name=${archiveName}" class="btn btn-success" download>Скачать архив</a>
+                        <a href="/download_archive?archive_name=${archiveName}" class="btn btn-success" download>Скачать архив (можно только один раз)</a>
                     `);
                 },
                 error: function (err) {
@@ -89,7 +86,6 @@
             });
         });
 
-        // Обработка fragment_image
         $('#fragmentForm').on('submit', function (e) {
             e.preventDefault();
 
@@ -112,7 +108,7 @@
                     const archiveName = response.archive_name;
                     $('#fragmentResult').html(`
                         <p class="text-success">Фрагментация успешно выполнена! Файл: <strong>${archiveName}</strong></p>
-                        <a href="/download_archive?archive_name=${archiveName}" class="btn btn-success" download>Скачать архив с фрагментами</a>
+                        <a href="/download_archive?archive_name=${archiveName}" class="btn btn-success" download>Скачать архив с фрагментами (можно только один раз)</a>
                     `);
                 },
                 error: function (err) {
