@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Обработка изображений</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center">Обработка изображений</h1>
+
+    <!-- Секция для эндпоинта create_mask -->
+    <div class="card mb-5">
+        <div class="card-header bg-primary text-white">
+            <h3>Создание маски и полигона</h3>
+        </div>
+        <div class="card-body">
+            <form id="createMaskForm">
+                <div class="form-group">
+                    <label for="maskImageInput">Выберите изображение:</label>
+                    <input type="file" class="form-control-file" id="maskImageInput" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Создать маску</button>
+            </form>
+            <div id="maskResult" class="mt-4"></div>
+        </div>
+    </div>
+
+    <!-- Секция для эндпоинта fragment_image -->
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h3>Фрагментация изображения</h3>
+        </div>
+        <div class="card-body">
+            <form id="fragmentForm">
+                <div class="form-group">
+                    <label for="fragmentImageInput">Выберите изображение:</label>
+                    <input type="file" class="form-control-file" id="fragmentImageInput" accept="image/*" required>
+                </div>
+                <div class="form-group">
+                    <label for="overlapSize">Размер перекрытия (пиксели):</label>
+                    <input type="number" class="form-control" id="overlapSize" value="100" required>
+                </div>
+                <div class="form-group">
+                    <label for="maxFragmentSize">Максимальный размер фрагмента (пиксели):</label>
+                    <input type="number" class="form-control" id="maxFragmentSize" value="5000" required>
+                </div>
+                <div class="form-group">
+                    <label for="minCoverage">Минимальное покрытие:</label>
+                    <input type="number" step="0.01" class="form-control" id="minCoverage" value="0.05" required>
+                </div>
+                <button type="submit" class="btn btn-success">Выполнить фрагментацию</button>
+            </form>
+            <div id="fragmentResult" class="mt-4"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Обработка create_mask
+        $('#createMaskForm').on('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData();
+            const imageFile = $('#maskImageInput')[0].files[0];
+            formData.append('image', imageFile);
+
+            $('#maskResult').html('<p class="text-info">Выполняется...</p>');
+
+            $.ajax({
+                url: '/create_mask',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    const archiveName = response.archive_name;
+                    $('#maskResult').html(`
+                        <p class="text-success">Маска и полигон успешно созданы! Файл: <strong>${archiveName}</strong></p>
+                        <a href="/download_archive?archive_name=${archiveName}" class="btn btn-success" download>Скачать архив</a>
+                    `);
+                },
+                error: function (err) {
+                    $('#maskResult').html(`<div class="alert alert-danger">Ошибка: ${err.responseJSON.detail}</div>`);
+                }
+            });
+        });
+
+        // Обработка fragment_image
+        $('#fragmentForm').on('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData();
+            const imageFile = $('#fragmentImageInput')[0].files[0];
+            formData.append('image', imageFile);
+            formData.append('overlap_size', $('#overlapSize').val());
+            formData.append('max_fragment_size', $('#maxFragmentSize').val());
+            formData.append('min_coverage', $('#minCoverage').val());
+
+            $('#fragmentResult').html('<p class="text-info">Выполняется...</p>');
+
+            $.ajax({
+                url: '/fragment_image',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    const archiveName = response.archive_name;
+                    $('#fragmentResult').html(`
+                        <p class="text-success">Фрагментация успешно выполнена! Файл: <strong>${archiveName}</strong></p>
+                        <a href="/download_archive?archive_name=${archiveName}" class="btn btn-success" download>Скачать архив с фрагментами</a>
+                    `);
+                },
+                error: function (err) {
+                    $('#fragmentResult').html(`<div class="alert alert-danger">Ошибка: ${err.responseJSON.detail}</div>`);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
